@@ -1,0 +1,287 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Test</title>
+
+<style type="text/css">
+html, body, #wpt-container {
+	width: 100%;
+	height: 100%;
+}
+</style>
+
+<link rel='stylesheet' href='resources/brightsea/wpt/wpt.css'>
+
+<script type="text/javascript" src="resources/brightsea/wpt/wpt.js"
+	data-dojo-config="async:1, baseUrl: 'resources/brightsea/dojo/'"></script>
+<script type="text/javascript"
+	src="resources/jquery/jquery-1.11.0.min.js"></script>
+<script type="text/javascript"
+	src="resources/highcharts/4.0.1/highcharts-all.js"></script>
+<script type="text/javascript"
+	src="resources/highcharts/group_categories/grouped-categories.js"></script>
+
+<script type="text/javascript">
+	var wpt;
+	require([ "wpt/WebPivotTable", "dojo/domReady!" ], function(WebPivotTable) {
+		wpt = new WebPivotTable({
+			customOptions : {
+				leavePageWarning : 0,
+				uiFlags : {
+					helpBtn : 0,
+					aboutBtn : 0,
+
+					openWptMenu : 1,
+					saveWptMenu : 1,
+					sourceDataMenu : 1,
+					exportReportMenu : 0,
+					settingMenu : 1,
+
+					csvFileMenu : 1,
+					xlsFileMenu : 1,
+					xlsxFileMenu : 1,
+					gssFileMenu : 0,
+					olapCubeMenu : 0,
+
+					internetLinkMenu : 0,
+					localDriveMenu : 1,
+					cloudDriveMenu : 0,
+					copyPasteMenu : 1
+				}
+			}
+		}, "wpt-container");
+
+		return wpt;
+
+	});
+
+	pushTesting = function() {
+
+		$.ajax({
+			//url : "NewData.csv",
+			//url : "WptNewData.csv",
+			url : "atSummary.json",
+			
+			success : function(stockReportsJson) {
+				
+				var arrayJson = JSON.parse(JSON.stringify(stockReportsJson));
+				console.log("SUCCESS");
+				
+				var headings = "\"account Id\",\"attributeName\",\"attributeType\",\"changePercent\",\"id\",\"initOutPercent\",\"initPercent\",\"maxPercent\",\"minPercent\",\"optimalOutPercent\",\"proposedMarketValue\",\"proposedPercent\",\"workflowId\"";	
+				
+				var arrayLength = arrayJson.length;
+				for (var i = 0; i < arrayLength; i++) {
+					headings +="\n"
+					
+						
+					headings +=","+ arrayJson[i].accountId;
+					headings +=","+ arrayJson[i].attributeName;
+					headings +=","+ arrayJson[i].attributeType;
+					headings +=","+ parseFloat((arrayJson[i].changePercent).value,10).toFixed(3);
+					headings +=","+ arrayJson[i].id;
+					headings +=","+ parseFloat((arrayJson[i].initOutPercent).value,10).toFixed(3);
+					headings +=","+ parseFloat((arrayJson[i].initPercent).value,10).toFixed(3);
+					headings +=","+ parseFloat((arrayJson[i].maxPercent).value,10).toFixed(3);
+					headings +=","+ parseFloat((arrayJson[i].minPercent).value,10).toFixed(3);
+					headings +=","+ parseFloat((arrayJson[i].optimalOutPercent).value,10).toFixed(3);
+					headings +=","+ parseFloat((arrayJson[i].proposedMarketValue).value,10).toFixed(3);
+					headings +=","+ parseFloat((arrayJson[i].proposedPercent).value,10).toFixed(3);
+					headings +=","+ arrayJson[i].workflowId;	
+				}
+				wpt.setCsvRawData(headings);
+				
+				
+				
+			},
+			error : function(d) {
+				console.log("ERROR FOUND Data load " + d);
+			}
+		});
+
+	}
+
+	pushWPTformatFile = function() {
+		
+		
+		 var wJson = "";
+
+		  $.ajax({
+				url : "filewithlimitedsync.wpt",	
+				success : function(stockReportsJson) 
+				{
+						
+					console.log(" success ");
+					
+					
+					
+					wJson = 	stockReportsJson;
+					
+					var myOptions = {
+						       uiFlags: {
+						          openWptBtn: 0,
+						          saveWptBtn: 1
+						       }
+						    }
+					 var customOptions = myOptions;
+					 
+					
+					wpt.sources[0].mode = "MEMORY";
+					wpt.setOptions(customOptions);
+					wpt.setWptString(wJson);
+					wpt.changeLocale();
+				},
+				error : function(d) {
+					
+					wJson = d.responseText;
+					
+					var myOptions = {
+						       uiFlags: {
+						          openWptBtn: 0,
+						          saveWptBtn: 0
+						       }
+						    }
+					 var customOptions = myOptions;
+					 
+					 
+					
+					wpt.setOptions(customOptions);
+					wpt.setWptString(wJson);
+					wpt.changeLocale();
+				}
+				
+				
+				
+		});
+
+		/* $.ajax({
+			//url : "wptformat.wpt",
+			url : "wptfiles/TestWPTnodata.wpt",
+			success : function(format) {
+
+				console.log("SUCCESS WPT file format");
+				fmt = (format);
+				wpt.setWptString(fmt);
+				wpt.changeLocale();
+				
+				wpt.setWptString(fmt);
+				wpt.changeLocale();
+			},
+			error : function(d) {
+				console.log("ERROR FOUND WPT File Format" + d);
+			}
+
+		}); */
+	}
+	
+	pushWPTformatFileJSON = function() {
+
+		$.ajax({
+			//url : "wptformat.wpt",
+			url : "wptfiles/TestWPTnodata.wpt",
+			success : function(format) {
+
+				console.log("SUCCESS WPT file format JSON parse");
+				fmt = JSON.parse(format);
+				wpt.setWptString(fmt);
+				wpt.changeLocale();
+			},
+			error : function(d) {
+				console.log("ERROR FOUND WPT File Format JSON parse" + d);
+			}
+
+		});
+	}
+	
+	pushCustomWPT = function() {
+
+		$.ajax({
+			//url : "wptformat.wpt",
+			url : "wptfiles/TestWPTmodified.wpt",
+			success : function(format) {
+
+				console.log("SUCCESS WPT file format JSON parse");
+				
+				var stringWPT = '{"format":"WPT","version":"2.0","sources":[{"id":1,"name":"Source1","mode":"MEMORY","format":"CSV","url":"NewData.csv","data":[[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,1,0,0,0,0,0,0,0,0],[0,2,0,1,2,1,1,1,1,1,1,1,0],[1,3,1,2,3,2,2,2,2,2,2,2,0],[1,0,0,0,4,3,0,3,3,3,0,0,0],[1,4,2,2,5,4,2,4,4,1,2,2,0],[1,5,3,2,6,4,2,5,5,1,2,2,0]],"fields":[{"id":0,"name":"0","label":"accountId","lookups":["C","D"],"type":"STRING"},{"id":1,"name":"1","label":"attributeName","lookups":["BOND","BONDS","EQUITIES","123","ENGINE","UZAIR"],"type":"STRING"},{"id":2,"name":"2","label":"attributeType","lookups":["ASSET_CLASSES","11","BUG","MATRIX"],"type":"STRING"},{"id":3,"name":"3","label":"changePercent","lookups":["0","-0.832213118","-0.014552633"],"type":"NUMBER"},{"id":4,"name":"4","label":"id","lookups":["2548","2547","2546","2545","2544","2543","2542"],"type":"NUMBER"},{"id":5,"name":"5","label":"initOutPercent","lookups":["0.067325625","0.832213118","0.344563818","0.032674375","0"],"type":"NUMBER"},{"id":6,"name":"6","label":"initPercent","lookups":["0","1.101515619","0.344890561"],"type":"NUMBER"},{"id":7,"name":"7","label":"maxPercent","lookups":["0.134651251","0.269302501","0.000326744","0.065348749","1.883677699","0.653487493"],"type":"NUMBER"},{"id":8,"name":"8","label":"minPercent","lookups":["0.067325625","0.201976876","0","0.032674375","0.330337928","0.326743747"],"type":"NUMBER"},{"id":9,"name":"9","label":"optimalOutPercent","lookups":["0.067325625","0","0.330011184","0.032674375"],"type":"NUMBER"},{"id":10,"name":"10","label":"proposedMarketValue","lookups":["0","2958.04372","3628.462521"],"type":"NUMBER"},{"id":11,"name":"11","label":"proposedPercent","lookups":["0","0.269302501","0.330337928"],"type":"NUMBER"},{"id":12,"name":"12","label":"workflowId","lookups":["8939"],"type":"NUMBER"}]}],"sheets":[{"id":1,"name":"Sheet1","sourceId":1,"fields":[{"id":0,"name":"0","label":"accountId","type":"STRING"},{"id":1,"name":"1","label":"attributeName","type":"STRING"},{"id":2,"name":"2","label":"attributeType","type":"STRING"},{"id":3,"name":"3","label":"changePercent","type":"NUMBER"},{"id":4,"name":"4","label":"id","type":"NUMBER"},{"id":5,"name":"5","label":"initOutPercent","type":"NUMBER"},{"id":6,"name":"6","label":"initPercent","type":"NUMBER"},{"id":7,"name":"7","label":"maxPercent","type":"NUMBER"},{"id":8,"name":"8","label":"minPercent","type":"NUMBER"},{"id":9,"name":"9","label":"optimalOutPercent","type":"NUMBER"},{"id":10,"name":"10","label":"proposedMarketValue","type":"NUMBER"},{"id":11,"name":"11","label":"proposedPercent","type":"NUMBER"},{"id":12,"name":"12","label":"workflowId","type":"NUMBER"}],"rows":[1,0],"cols":[],"filters":[],"values":[{"id":3,"label":"Sum of initOutPercent","fieldIndex":5,"stats":"SUM","format":{}},{"id":4,"label":"Sum of proposedPercent","fieldIndex":11,"stats":"SUM","format":{}}],"valuesInAxis":0,"valuesIndex":0,"sheetOptions":{"chartFirst":0,"pivotLayout":"1","expandRows":1,"expandCols":1,"nonEmpty":1,"mdx":""},"gridOptions":{"showSigns":1,"showRowTotals":1,"showColTotals":1,"showRowSubtotals":1,"showColSubtotals":1,"compactForm":1,"rowHeaderWidth":70,"cellWidth":130,"cellHeight":23,"theme":"wpt-default"},"chartOptions":{"width":500,"height":300,"high":{"theme":"default","chart":{"type":"column","options3d":{"enabled":false,"alpha":15,"beta":15,"depth":50,"viewDistance":25}},"credits":{"enabled":false},"exporting":{"enabled":true},"navigation":{"buttonOptions":{"align":"right","verticalAlign":"top"}},"legend":{"enabled":true,"floating":false,"layout":"vertical","align":"right","verticalAlign":"middle","reversed":false},"tooltip":{"enabled":true,"shadow":true},"plotOptions":{"series":{"stacking":null}},"xAxis":{"labels":{"enabled":true,"align":"left","rotation":45}}}}}],"reports":[],"tabIndex":0,"view":"PIVOTTABLE","leavePageWarning":0}';
+				fmt = JSON.parse(stringWPT);
+				wpt.setWptString(fmt);
+				wpt.changeLocale();
+			},
+			error : function(d) {
+				console.log("ERROR FOUND WPT File Format JSON parse" + d);
+			}
+
+		});
+	}
+	
+	pushDataWithSum = function() {
+		$.ajax({
+			//url : "NewData.csv",
+			url : "WptNewData.csv",
+			success : function(stockReportsJson) {
+				console.log("SUCCESS");
+				wpt.setCsvRawData(stockReportsJson);
+				
+				
+  				
+  				
+				
+			},
+			error : function(d) {
+				console.log("ERROR FOUND Data load " + d);
+			}
+		});		
+	}
+	
+	
+	pushRow = function() {
+		
+		
+		var myOptions = {
+			       uiFlags: {
+			          openWptBtn: 0,
+			          saveWptBtn: 0
+			       }
+			    }
+		 var customOptions = myOptions;
+		 
+		 
+		
+		wpt.setOptions(customOptions);
+		
+		var aggregation1 = {
+	            "id": 1,
+	            "label": "Sum of Proposed Market Value",
+	            "fieldIndex": 10,
+	            "stats": "SUM",
+	            "format": {}
+	        }
+		
+		var aggregation2 = {
+	            "id": 2,
+	            "label": "Sum of Proposed Percent Value",
+	            "fieldIndex": 11,
+	            "stats": "SUM",
+	            "format": {}
+	        }
+ 
+			
+ 
+			 wpt.sheets[0].rows = [0,1];
+			 wpt.sheets[0].values = [aggregation1,aggregation2];
+			 wpt.changeLocale();
+	}
+</script>
+</head>
+
+<body class="claro">
+	<input type="button" onclick="pushTesting()"		value="Push Data From Service(Working)" />
+	<input type="button" onclick="pushWPTformatFile()" value="Push Data From WPTfile(Not Working)" />
+	<input type="button" onclick="pushWPTformatFileJSON()" value="Push Data From WPTfile With JSON Parse(Not Working)" />
+	<input type="button" onclick="pushCustomWPT()" value="Custom WPT(Not Working)" />
+	<input type="button" onclick="pushDataWithSum()" value="Data Loading(Working ) Aggregation (Not Working)" />
+	<input type="button" onclick="pushRow()" value="Push Row" />
+	<div id="wpt-container"></div>
+</body>
+</html>
+
+
